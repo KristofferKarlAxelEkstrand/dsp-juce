@@ -69,6 +69,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
+          build-essential \
+          pkg-config \
           libasound2-dev \
           libx11-dev \
           libxcomposite-dev \
@@ -80,21 +82,19 @@ jobs:
           libgl1-mesa-dev \
           libxext-dev \
           libcurl4-openssl-dev \
-          libwebkit2gtk-4.1-dev \
-          pkg-config \
-          build-essential
+          libwebkit2gtk-4.1-dev
 
     - name: Cache JUCE
       uses: actions/cache@v4
       id: cache-juce
       with:
-        path: ${{ github.workspace }}/.juce_cache
+        path: .juce_cache
         key: ${{ runner.os }}-juce-${{ hashFiles('**/CMakeLists.txt', '**/cmake/**') }}
         restore-keys: |
           ${{ runner.os }}-juce-
 
     - name: Configure CMake
-      run: cmake --preset=${{ env.CMAKE_PRESET }} -DFETCHCONTENT_BASE_DIR=${{ github.workspace }}/.juce_cache
+      run: cmake --preset=${{ env.CMAKE_PRESET }} -DFETCHCONTENT_BASE_DIR=.juce_cache
       shell: bash
 
     - name: Build
@@ -148,8 +148,8 @@ jobs:
       uses: actions/upload-artifact@v4
       if: matrix.build_type == 'Release'
       with:
-        name: DSPJucePlugin-${{ matrix.os }}
+        name: DSPJucePlugin-${{ matrix.os }}-Release
         path: |
-          build/vs2022/DSPJucePlugin_artefacts/Release/
           ${{ env.BUILD_DIR }}/DSPJucePlugin_artefacts/Release/
         retention-days: 30
+        if-no-files-found: warn
